@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Virtual Memory Page Replacement Visualizer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <header class="hero">
+    <div class="eyebrow">OPERATING SYSTEMS • OSSP PROJECT</div>
+    <h1>Virtual Memory Page Replacement Visualizer</h1>
+    <p>Explore FIFO, LRU, and Optimal page replacement step by step.</p>
+  </header>
+
+  <main class="container">
+    <section class="panel input-panel">
+      <div class="section-heading">
+        <div>
+          <h2>Simulation Setup</h2>
+          <p>Enter the page sequence and available memory frames.</p>
+        </div>
+        <span class="status-dot">Ready</span>
+      </div>
+      <form id="simulationForm">
+        <label for="referenceString">Page reference string</label>
+        <input id="referenceString" type="text" value="1, 2, 3, 2, 1, 4, 5, 2" placeholder="Example: 1, 2, 3, 2, 1, 4" autocomplete="off">
+        <small>Enter page numbers separated by commas or spaces.</small>
+        <div class="frame-row">
+          <div class="frame-input">
+            <label for="frameCount">Number of frames</label>
+            <input id="frameCount" type="number" min="1" max="10" value="3">
+          </div>
+          <button class="primary-button" type="submit">Run Simulation <span aria-hidden="true">→</span></button>
+        </div>
+        <div class="examples">
+          <span>Try an example:</span>
+          <button type="button" class="example-button" data-sequence="1, 2, 3, 2, 1, 5, 2, 1, 6, 2, 5, 6, 3, 1, 3, 6, 1, 2, 4, 3" data-frames="3">20-page sequence</button>
+          <button type="button" class="example-button" data-sequence="7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0, 3, 2" data-frames="4">Classic example</button>
+        </div>
+        <p id="errorMessage" class="error-message" role="alert"></p>
+      </form>
+    </section>
+
+    <section class="summary-grid" id="summaryCards" aria-live="polite"></section>
+
+    <section class="panel">
+      <div class="section-heading">
+        <div>
+          <h2>Page Fault Comparison</h2>
+          <p>Lower page-fault counts mean fewer page loads were needed for this input.</p>
+        </div>
+      </div>
+      <div class="chart-wrap">
+        <canvas id="faultChart" role="img" aria-label="Bar chart comparing page faults for FIFO, LRU, and Optimal"></canvas>
+      </div>
+      <div id="comparisonNote" class="comparison-note"></div>
+    </section>
+
+    <section class="panel">
+      <div class="section-heading">
+        <div>
+          <h2>Step-by-Step Simulation</h2>
+          <p>Each column represents one requested page. Green indicates a hit; rose indicates a fault.</p>
+        </div>
+      </div>
+      <div class="algorithm-tabs" role="tablist" aria-label="Choose algorithm">
+        <button class="tab active" data-algorithm="FIFO" role="tab" aria-selected="true">FIFO</button>
+        <button class="tab" data-algorithm="LRU" role="tab" aria-selected="false">LRU</button>
+        <button class="tab" data-algorithm="Optimal" role="tab" aria-selected="false">Optimal</button>
+      </div>
+      <div id="algorithmDescription" class="algorithm-description"></div>
+      <div id="simulationTable" class="table-scroll"></div>
+      <div class="legend">
+        <span><i class="legend-box hit"></i> Page hit</span>
+        <span><i class="legend-box fault"></i> Page fault</span>
+        <span><i class="legend-box empty"></i> Empty frame</span>
+      </div>
+    </section>
+
+    <footer>
+      <p>Virtual Memory Page Replacement Visualizer · Built with HTML, CSS and JavaScript</p>
+      <p class="footer-note">Educational simulation only. Optimal uses future references to choose the page whose next use is farthest away.</p>
+    </footer>
+  </main>
+  <script src="script.js"></script>
+</body>
+</html>
