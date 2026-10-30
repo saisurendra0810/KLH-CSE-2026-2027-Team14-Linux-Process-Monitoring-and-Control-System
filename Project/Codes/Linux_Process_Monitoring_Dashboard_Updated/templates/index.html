@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SystemPulse | Process Monitoring Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-shell">
+        <aside class="sidebar">
+            <div class="brand">
+                <div class="brand-mark">SP</div>
+                <div><strong>SystemPulse</strong><small>Process Monitor</small></div>
+            </div>
+
+            <nav class="side-nav">
+                <button class="nav-item active" data-section="memorySection" onclick="showSection('memorySection', this)">
+                    <span class="nav-icon">▣</span><span>Memory Usage</span>
+                </button>
+                <button class="nav-item" data-section="cpuSection" onclick="showSection('cpuSection', this)">
+                    <span class="nav-icon">◒</span><span>CPU Usage</span>
+                </button>
+                <button class="nav-item" data-section="processesSection" onclick="showSection('processesSection', this)">
+                    <span class="nav-icon">☷</span><span>Processes</span><b id="sideProcessCount">0</b>
+                </button>
+                <button class="nav-item" data-section="healthSection" onclick="showSection('healthSection', this)">
+                    <span class="nav-icon">♥</span><span>Process Health</span>
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <span class="live-dot"></span>
+                <div><strong>Live monitoring</strong><small>Updates every 3 seconds</small></div>
+            </div>
+        </aside>
+
+        <main class="main-content">
+            <header class="topbar">
+                <div>
+                    <p class="eyebrow">SYSTEM MONITORING</p>
+                    <h1>Dashboard</h1>
+                    <p class="subtitle">Real-time CPU, memory, process and health monitoring.</p>
+                </div>
+                <div class="system-pill"><span class="live-dot"></span> System Online</div>
+            </header>
+
+            <section class="overview-grid">
+                <div class="metric-card cpu-card">
+                    <div class="metric-icon">◒</div>
+                    <div><span>CPU Usage</span><strong id="cpu">0%</strong><small id="cpuMeta">Live processor load</small></div>
+                </div>
+                <div class="metric-card memory-card">
+                    <div class="metric-icon">▣</div>
+                    <div><span>Memory Usage</span><strong id="memory">0%</strong><small id="memoryMeta">0 GB used</small></div>
+                </div>
+                <div class="metric-card process-card">
+                    <div class="metric-icon">☷</div>
+                    <div><span>Processes</span><strong id="processCount">0</strong><small id="runningCount">0 currently running</small></div>
+                </div>
+                <div class="metric-card health-card">
+                    <div class="metric-icon">♥</div>
+                    <div><span>Health Score</span><strong id="healthAverage">0</strong><small>Average process health</small></div>
+                </div>
+            </section>
+
+            <section class="dashboard-grid">
+                <div class="panel chart-panel" id="memorySection">
+                    <div class="panel-head"><div><span class="section-kicker">MEMORY</span><h2>Memory Usage</h2><p>Live system memory utilization.</p></div><strong class="live-value" id="memoryChartValue">0%</strong></div>
+                    <canvas id="memoryChart" height="210"></canvas>
+                    <div class="chart-foot"><span>Total <b id="totalMemory">0 GB</b></span><span>Used <b id="usedMemory">0 GB</b></span><span>Available <b id="availableMemory">0 GB</b></span></div>
+                </div>
+
+                <div class="panel chart-panel" id="cpuSection">
+                    <div class="panel-head"><div><span class="section-kicker">CPU</span><h2>CPU Usage</h2><p>Live processor utilization.</p></div><strong class="live-value" id="cpuChartValue">0%</strong></div>
+                    <canvas id="cpuChart" height="210"></canvas>
+                    <div class="chart-foot"><span>Current <b id="cpuCurrent">0%</b></span><span>Samples <b id="sampleCount">0</b></span><span>Refresh <b>3 sec</b></span></div>
+                </div>
+            </section>
+
+            <section class="panel process-panel" id="processesSection">
+                <div class="panel-head process-head">
+                    <div><span class="section-kicker">PROCESS TABLE</span><h2>Running Processes</h2><p>Select any process to inspect its live details and health score.</p></div>
+                    <div class="process-actions"><div class="count-chip"><b id="tableProcessCount">0</b> processes</div><input id="search" type="text" placeholder="Search PID or process name..."><button onclick="loadProcesses()">Refresh</button></div>
+                </div>
+                <div id="message"></div>
+                <div class="table-wrap">
+                    <table>
+                        <thead><tr><th>PID</th><th>PROCESS</th><th>USER</th><th>STATUS</th><th>CPU</th><th>MEMORY</th><th>HEALTH</th><th></th></tr></thead>
+                        <tbody id="processTable"><tr><td colspan="8" class="loading">Loading processes...</td></tr></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <section class="panel health-panel" id="healthSection">
+                <div class="panel-head"><div><span class="section-kicker">PROCESS HEALTH</span><h2>Health Score Monitor</h2><p>Scores are calculated from CPU load, memory usage and process state.</p></div><div class="health-legend"><span>80–100 Healthy</span><span>50–79 Watch</span><span>0–49 Critical</span></div></div>
+                <div id="healthList" class="health-list"><div class="loading">Loading process health...</div></div>
+            </section>
+
+            <section class="panel selected-panel">
+                <div class="panel-head"><div><span class="section-kicker">SELECTED PROCESS</span><h2 id="selectedTitle">No process selected</h2><p id="selectedSubtitle">Choose a process from the table to view its details.</p></div><div class="selected-actions"><button class="secondary" onclick="controlSelected('suspend')">Suspend</button><button class="secondary" onclick="controlSelected('resume')">Resume</button><button class="warning" onclick="controlSelected('terminate')">Terminate</button><button class="danger" onclick="controlSelected('kill')">Kill</button></div></div>
+                <div id="selectedDetails" class="selected-details empty-state">Select a process to display its live details, resource usage and health score.</div>
+            </section>
+        </main>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
